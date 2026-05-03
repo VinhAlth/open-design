@@ -528,11 +528,17 @@ const HOST_ALLOWED_INSPECT_PROPS = new Set([
 // newlines. Mirrors the bridge's UNSAFE_VALUE regex.
 const HOST_UNSAFE_INSPECT_VALUE = /[;{}<>\n\r]/;
 
-// elementIds we'll splice into a `[data-od-id="..."]` selector. Restrict to
-// characters that are unambiguously safe inside a double-quoted CSS attr
-// value: alphanumerics, dash, underscore, colon, and dot. Anything else
-// (quote, backslash, angle bracket, whitespace) is rejected outright.
-const HOST_SAFE_INSPECT_ID = /^[A-Za-z0-9_\-:.]+$/;
+// Reject elementIds whose characters could break out of `[attr="..."]`
+// inside a <style> block. Forbidden:
+//   - `"` and `\` would close the attribute string or smuggle CSS
+//     escapes the host didn't pre-process;
+//   - `<` and `>` would close the surrounding <style> tag;
+//   - C0/C1 controls (newline, etc.) end the CSS rule under string
+//     tokenization — kept in as defense-in-depth against parser quirks.
+// Everything else — including ASCII whitespace and leading digits — is
+// allowed, so deck labels like `01 Cover` survive instead of being
+// dropped on the way to the persisted overrides block.
+const HOST_UNSAFE_INSPECT_ID = /["\\<>\u0000-\u001f\u007f]/;
 
 // Build the inspect overrides CSS body the host will persist, from the
 // structured `overrides` field of an od:inspect-overrides message. The host
@@ -546,15 +552,20 @@ export function serializeInspectOverrides(overrides: unknown): string {
   const map = overrides as Record<string, unknown>;
   const lines: string[] = [];
   for (const elementId of Object.keys(map)) {
-    if (!HOST_SAFE_INSPECT_ID.test(elementId)) continue;
+    if (!elementId || HOST_UNSAFE_INSPECT_ID.test(elementId)) continue;
     const entry = map[elementId] as InspectOverridePayload | null | undefined;
     if (!entry || typeof entry !== 'object') continue;
     const props = entry.props;
     if (!props || typeof props !== 'object') continue;
-    // The bridge tags entries it built from data-screen-label with a
-    // matching selector; respect that signal but never let the inbound
-    // selector string itself reach the persisted body.
-    const attr = entry.selector === `[data-screen-label="${elementId}"]`
+    // Trust only the *kind* of selector the bridge built, not the value
+    // it carried. The bridge runs CSS.escape over the elementId, so a raw
+    // equality check against `[data-screen-label="${elementId}"]` would
+    // miss legitimate deck labels like `01 Cover` (whitespace, leading
+    // digit) and silently downgrade them to `[data-od-id="..."]`. The
+    // elementId itself was sanitized above, so embedding it verbatim into
+    // the re-derived selector is safe inside an attribute value string.
+    const inboundSelector = typeof entry.selector === 'string' ? entry.selector : '';
+    const attr = inboundSelector.startsWith('[data-screen-label="')
       ? 'data-screen-label'
       : 'data-od-id';
     const safeSelector = `[${attr}="${elementId}"]`;

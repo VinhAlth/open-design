@@ -159,6 +159,26 @@ describe('serializeInspectOverrides', () => {
     expect(out).not.toContain('[data-od-id="hero"]');
   });
 
+  // Regression for nexu-io/open-design#362: standard deck slides ship as
+  // `<section data-screen-label="01 Cover">`. The bridge keys overrides by
+  // the raw label and posts a CSS.escape'd selector, so the host must
+  // accept whitespace/leading-digit ids and detect the selector kind by
+  // prefix instead of full equality. Otherwise the override is dropped
+  // outright (or silently rewritten to `[data-od-id="..."]`) and reload
+  // erases the user's edit.
+  it('preserves data-screen-label values with whitespace and leading digits', () => {
+    const out = serializeInspectOverrides({
+      '01 Cover': {
+        selector: '[data-screen-label="\\30 1\\20 Cover"]',
+        props: { color: '#ff0000', 'font-size': '20px' },
+      },
+    });
+    expect(out).toContain('[data-screen-label="01 Cover"]');
+    expect(out).not.toContain('[data-od-id="01 Cover"]');
+    expect(out).toContain('color: #ff0000 !important');
+    expect(out).toContain('font-size: 20px !important');
+  });
+
   it('rejects non-allow-listed properties', () => {
     const out = serializeInspectOverrides({
       hero: { selector: '[data-od-id="hero"]', props: { position: 'absolute', color: '#fff' } },
