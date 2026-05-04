@@ -27,7 +27,11 @@ import {
   type SidecarRuntimeContext,
 } from "@open-design/sidecar";
 
-const HOST = "127.0.0.1";
+const HOST = process.env.OD_HOST || "127.0.0.1";
+if (process.env.OD_HOST != null && !/^[a-zA-Z0-9._\-:[\]@]+$/.test(process.env.OD_HOST)) {
+  throw new Error(`OD_HOST contains invalid characters: ${process.env.OD_HOST}`);
+}
+const DAEMON_HOST = "127.0.0.1";
 const DAEMON_PORT_ENV = SIDECAR_ENV.DAEMON_PORT;
 const WEB_DIST_DIR_ENV = SIDECAR_ENV.WEB_DIST_DIR;
 const WEB_PORT_ENV = SIDECAR_ENV.WEB_PORT;
@@ -132,7 +136,7 @@ function shouldUseStandaloneOutput(runtime: SidecarRuntimeContext<SidecarStamp>)
 
 function resolveDaemonOrigin(): string | null {
   const port = parsePort(process.env[DAEMON_PORT_ENV]);
-  return port === 0 ? null : `http://${HOST}:${port}`;
+  return port === 0 ? null : `http://${DAEMON_HOST}:${port}`;
 }
 
 function isDaemonProxyPathname(pathname: string): boolean {
@@ -512,7 +516,7 @@ async function startRegularNextSidecar(
   runtime: SidecarRuntimeContext<SidecarStamp>,
   webRoot: string,
 ): Promise<WebSidecarHandle> {
-  const app = createNextApp({ dev: runtime.mode === "dev", dir: webRoot });
+  const app = createNextApp({ dev: process.env.OD_WEB_PROD !== "1" && runtime.mode === "dev", dir: webRoot });
   await prepareNextApp(app, webRoot);
 
   const daemonOrigin = resolveDaemonOrigin();

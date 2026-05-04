@@ -14,16 +14,23 @@ const ENTRY_DIR_NAME = path.basename(__dirname);
 
 export const WORKSPACE_ROOT = resolve(__dirname, ENTRY_DIR_NAME === "dist" ? "../../.." : "../../..");
 
-export type ToolPackPlatform = "mac";
-export type ToolPackBuildOutput = "all" | "app" | "dmg" | "zip";
+export type ToolPackPlatform = "mac" | "win";
+export type ToolPackBuildOutput = "all" | "app" | "dir" | "dmg" | "nsis" | "zip";
 export type ToolPackWebOutputMode = "server" | "standalone";
 
 export type ToolPackCliOptions = {
   dir?: string;
+  expr?: string;
   json?: boolean;
   namespace?: string;
+  path?: string;
   portable?: boolean;
+  removeData?: boolean;
+  removeLogs?: boolean;
+  removeProductUserData?: boolean;
+  removeSidecars?: boolean;
   signed?: boolean;
+  silent?: boolean;
   to?: string;
 };
 
@@ -48,20 +55,28 @@ export type ToolPackConfig = {
   namespace: string;
   platform: ToolPackPlatform;
   portable: boolean;
+  removeData: boolean;
+  removeLogs: boolean;
+  removeProductUserData: boolean;
+  removeSidecars: boolean;
   roots: ToolPackRoots;
+  silent: boolean;
   signed: boolean;
   to: ToolPackBuildOutput;
   webOutputMode: ToolPackWebOutputMode;
   workspaceRoot: string;
 };
 
-function resolveToolPackBuildOutput(value: string | undefined): ToolPackBuildOutput {
-  if (value == null || value.length === 0) return "all";
-  if (value === "all" || value === "app" || value === "dmg" || value === "zip") return value;
-  throw new Error(`unsupported mac --to target: ${value}`);
+function resolveToolPackBuildOutput(platform: ToolPackPlatform, value: string | undefined): ToolPackBuildOutput {
+  if (value == null || value.length === 0) return platform === "win" ? "nsis" : "all";
+  if (platform === "mac" && (value === "all" || value === "app" || value === "dmg" || value === "zip")) return value;
+  if (platform === "win" && (value === "all" || value === "dir" || value === "nsis")) return value;
+  throw new Error(`unsupported ${platform} --to target: ${value}`);
 }
 
-function resolveToolPackWebOutputMode(value: string | undefined): ToolPackWebOutputMode {
+function resolveToolPackWebOutputMode(platform: ToolPackPlatform, value: string | undefined): ToolPackWebOutputMode {
+  // Standalone web output is wired for mac first; Windows falls back to server mode until its path is enabled.
+  if (platform === "win") return "server";
   if (value == null || value.length === 0) return "standalone";
   if (value === "server" || value === "standalone") return value;
   throw new Error(`unsupported OD_WEB_OUTPUT_MODE value: ${value}`);
@@ -125,9 +140,14 @@ export function resolveToolPackConfig(
       },
       toolPackRoot,
     },
+    removeData: options.removeData === true,
+    removeLogs: options.removeLogs === true,
+    removeProductUserData: options.removeProductUserData === true,
+    removeSidecars: options.removeSidecars === true,
+    silent: options.silent !== false,
     signed: options.signed === true,
-    to: resolveToolPackBuildOutput(options.to),
-    webOutputMode: resolveToolPackWebOutputMode(process.env.OD_WEB_OUTPUT_MODE),
+    to: resolveToolPackBuildOutput(platform, options.to),
+    webOutputMode: resolveToolPackWebOutputMode(platform, process.env.OD_WEB_OUTPUT_MODE),
     workspaceRoot: WORKSPACE_ROOT,
   };
 }

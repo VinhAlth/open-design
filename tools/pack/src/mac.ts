@@ -419,6 +419,9 @@ async function copyResourceTree(config: ToolPackConfig, paths: MacPaths): Promis
   await cp(join(config.workspaceRoot, "design-systems"), join(paths.resourceRoot, "design-systems"), {
     recursive: true,
   });
+  await cp(join(config.workspaceRoot, "craft"), join(paths.resourceRoot, "craft"), {
+    recursive: true,
+  });
   await cp(join(config.workspaceRoot, "assets", "frames"), join(paths.resourceRoot, "frames"), {
     recursive: true,
   });
@@ -513,7 +516,9 @@ async function writeAssembledApp(
   await runNpmInstall(paths.assembledAppRoot);
 }
 
-function resolveElectronBuilderTargets(to: ToolPackBuildOutput): ElectronBuilderTarget[] {
+type MacBuildOutput = Extract<ToolPackBuildOutput, "all" | "app" | "dmg" | "zip">;
+
+function resolveElectronBuilderTargets(to: MacBuildOutput): ElectronBuilderTarget[] {
   switch (to) {
     case "app":
       return ["dir"];
@@ -776,7 +781,7 @@ async function collectMacSizeReport(
 
 export async function packMac(config: ToolPackConfig): Promise<MacPackResult> {
   const paths = resolveMacPaths(config);
-  const targets = resolveElectronBuilderTargets(config.to);
+  const targets = resolveElectronBuilderTargets(config.to as MacBuildOutput);
   await buildWorkspaceArtifacts(config);
   await copyResourceTree(config, paths);
   const tarballs = await collectWorkspaceTarballs(config, paths);
