@@ -70,6 +70,8 @@ function resolveOptionalPath(value: string | undefined): string | undefined {
   return value == null || value.length === 0 ? undefined : resolve(value);
 }
 
+// Config DTOs use null for optional scalar values consumed by runtime options;
+// optional paths use undefined so callers can distinguish "no path" from a resolved path string.
 function cleanOptionalString(value: string | undefined): string | null {
   if (value == null) return null;
   const trimmed = value.trim();

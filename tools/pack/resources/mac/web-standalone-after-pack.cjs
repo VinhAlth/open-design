@@ -448,7 +448,7 @@ async function auditNoBrokenSymlinks(root, label) {
   };
 }
 
-module.exports = async function webStandaloneAfterPack(context) {
+async function runWebStandaloneAfterPack(context) {
   if (context?.electronPlatformName != null && context.electronPlatformName !== "darwin") return;
 
   const config = await readHookConfig();
@@ -494,4 +494,21 @@ module.exports = async function webStandaloneAfterPack(context) {
 
   await mkdir(path.dirname(config.auditReportPath), { recursive: true });
   await writeFile(config.auditReportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+}
+
+module.exports = async function webStandaloneAfterPack(context) {
+  try {
+    await runWebStandaloneAfterPack(context);
+  } catch (error) {
+    console.error(
+      "[tools-pack web-standalone] after-pack hook failed:",
+      error instanceof Error ? error.message : error,
+    );
+    console.error("[tools-pack web-standalone] electron-builder context:", {
+      appOutDir: context?.appOutDir,
+      electronPlatformName: context?.electronPlatformName,
+      productFilename: context?.packager?.appInfo?.productFilename,
+    });
+    throw error;
+  }
 };

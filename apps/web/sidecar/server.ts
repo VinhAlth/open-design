@@ -38,6 +38,7 @@ const WEB_PORT_ENV = SIDECAR_ENV.WEB_PORT;
 const TOOLS_DEV_PARENT_PID_ENV = SIDECAR_ENV.TOOLS_DEV_PARENT_PID;
 const WEB_OUTPUT_MODE_ENV = "OD_WEB_OUTPUT_MODE";
 const WEB_STANDALONE_ROOT_ENV = "OD_WEB_STANDALONE_ROOT";
+const STANDALONE_STARTUP_TIMEOUT_ENV = "OD_STANDALONE_STARTUP_TIMEOUT_MS";
 const SHUTDOWN_TIMEOUT_MS = 3000;
 const require = createRequire(import.meta.url);
 
@@ -92,6 +93,20 @@ function parsePort(value: string | undefined): number {
     throw new Error(`${WEB_PORT_ENV} must be an integer between 0 and 65535`);
   }
   return port;
+}
+
+function parsePositiveIntegerEnv(envName: string, defaultValue: number): number {
+  const value = process.env[envName];
+  if (value == null || value.trim().length === 0) return defaultValue;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`${envName} must be a positive integer`);
+  }
+  return parsed;
+}
+
+function resolveStandaloneStartupTimeoutMs(): number {
+  return parsePositiveIntegerEnv(STANDALONE_STARTUP_TIMEOUT_ENV, 35_000);
 }
 
 function resolveWebDistDir(webRoot: string): string {
@@ -331,19 +346,26 @@ async function probeStandaloneBackend(origin: string): Promise<boolean> {
 async function waitForStandaloneBackendReady(
   child: ChildProcess,
   origin: string,
-  timeoutMs = 35_000,
+  timeoutMs = resolveStandaloneStartupTimeoutMs(),
 ): Promise<void> {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeoutMs) {
     if (child.exitCode != null || child.signalCode != null) {
-      throw new Error(`standalone Next.js server exited before readiness: code=${child.exitCode} signal=${child.signalCode}`);
+      const elapsedMs = Date.now() - startedAt;
+      const likelyPortRace = elapsedMs <= 200;
+      throw new Error(
+        `standalone Next.js server exited before readiness after ${elapsedMs}ms: code=${child.exitCode} signal=${child.signalCode}`
+        + (likelyPortRace
+          ? "; the reserved startup port may have been claimed before the child process bound it, retry the launch"
+          : ""),
+      );
     }
     if (await probeStandaloneBackend(origin)) return;
     await new Promise((resolveWait) => setTimeout(resolveWait, 150));
   }
 
-  throw new Error(`timed out waiting for standalone Next.js server at ${origin}`);
+  throw new Error(`timed out after ${timeoutMs}ms waiting for standalone Next.js server at ${origin}; override with ${STANDALONE_STARTUP_TIMEOUT_ENV}`);
 }
 
 async function startStandaloneBackend(webRoot: string): Promise<StandaloneBackend> {
@@ -364,7 +386,7 @@ async function startStandaloneBackend(webRoot: string): Promise<StandaloneBacken
       PORT: String(port),
     },
     stdio: ["ignore", "inherit", "inherit"],
-    windowsHide: true,
+    ...(process.platform === "win32" ? { windowsHide: true } : {}),
   });
   await new Promise<void>((resolveSpawn, rejectSpawn) => {
     child.once("error", rejectSpawn);
