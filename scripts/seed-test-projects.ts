@@ -290,12 +290,20 @@ async function main() {
   }
 
   console.log(`seeding ${decks.length} deck(s) + ${webs.length} web prototype(s) → ${args.daemonUrl}`);
+  const failures: string[] = [];
   for (const fix of [...decks, ...webs]) {
     try {
       await seedOne(args.daemonUrl, fix);
     } catch (err) {
+      failures.push(fix.skillId);
       console.error(`  ! ${fix.skillId} failed: ${(err as Error).message}`);
     }
+  }
+  if (failures.length > 0) {
+    console.error(
+      `done with ${failures.length} failure(s): ${failures.join(', ')}`,
+    );
+    process.exit(1);
   }
   console.log('done. Open the web UI — the seeded projects show up in the project list.');
 }
