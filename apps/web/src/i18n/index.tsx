@@ -57,7 +57,7 @@ const LS_KEY = 'open-design:locale';
 // localStorage but never auto-detect from `navigator.language`, so the
 // initial experience is consistent and predictable.
 function detectInitialLocale(): Locale {
-  if (typeof window === 'undefined') return 'en';
+  if (typeof window === 'undefined') return 'vi';
   try {
     const stored = window.localStorage.getItem(LS_KEY);
     if (stored && (LOCALES as string[]).includes(stored)) {
@@ -66,7 +66,7 @@ function detectInitialLocale(): Locale {
   } catch {
     /* ignore */
   }
-  return 'en';
+  return 'vi';
 }
 
 interface I18nContextValue {

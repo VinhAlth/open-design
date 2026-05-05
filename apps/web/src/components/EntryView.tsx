@@ -318,24 +318,7 @@ export function EntryView({
               </button>
               {avatarMenuOpen ? (
                 <div className="avatar-popover" role="menu">
-                  <button
-                    type="button"
-                    className="avatar-item"
-                    onClick={() => {
-                      setPetRailHidden(!petRailHidden);
-                      setAvatarMenuOpen(false);
-                    }}
-                  >
-                    <span className="avatar-item-icon" aria-hidden>
-                      <Icon name={petRailHidden ? 'sparkles' : 'eye'} size={14} />
-                    </span>
-                    <span>
-                      {petRailHidden
-                        ? t('pet.railShow')
-                        : t('pet.railHide')}
-                    </span>
-                  </button>
-                  <div style={{ height: 1, background: 'var(--border-soft)', margin: '4px 6px' }} />
+
                   <button
                     type="button"
                     className="avatar-item"
