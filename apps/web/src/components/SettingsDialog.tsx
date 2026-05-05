@@ -56,6 +56,10 @@ interface Props {
 }
 
 const SUGGESTED_MODELS_BY_PROTOCOL = {
+  macdinh: [
+    'gpt-5.4-nano',
+    'gpt-5.4-mini',
+  ],
   anthropic: [
     'claude-opus-4-5',
     'claude-sonnet-4-5',
@@ -107,13 +111,15 @@ const API_PROTOCOL_TABS: Array<{
   id: ApiProtocol;
   title: string;
 }> = [
-  { id: 'anthropic', title: 'Anthropic' },
-  { id: 'openai', title: 'OpenAI' },
-  { id: 'azure', title: 'Azure OpenAI' },
-  { id: 'google', title: 'Google Gemini' },
-];
+    { id: 'macdinh', title: 'Mặc định' },
+    { id: 'anthropic', title: 'Anthropic' },
+    { id: 'openai', title: 'OpenAI' },
+    { id: 'azure', title: 'Azure OpenAI' },
+    { id: 'google', title: 'Google Gemini' },
+  ];
 
 const API_PROTOCOL_LABELS: Record<ApiProtocol, string> = {
+  macdinh: 'Mặc định',
   anthropic: 'Anthropic API',
   openai: 'OpenAI API',
   azure: 'Azure OpenAI',
@@ -121,6 +127,7 @@ const API_PROTOCOL_LABELS: Record<ApiProtocol, string> = {
 };
 
 const API_KEY_PLACEHOLDERS: Record<ApiProtocol, string> = {
+  macdinh: 'sk-...',
   anthropic: 'sk-ant-...',
   openai: 'sk-...',
   azure: 'azure key',
@@ -352,10 +359,10 @@ export function SettingsDialog({
     cfg.mode === 'daemon'
       ? Boolean(cfg.agentId && agents.find((a) => a.id === cfg.agentId)?.available)
       : Boolean(
-          cfg.apiKey.trim() &&
-          cfg.model.trim() &&
-          baseUrlValid,
-        );
+        cfg.apiKey.trim() &&
+        cfg.model.trim() &&
+        baseUrlValid,
+      );
 
   const protocolProviders = useMemo(
     () => KNOWN_PROVIDERS.filter((p) => p.protocol === apiProtocol),
@@ -365,10 +372,9 @@ export function SettingsDialog({
     cfg.apiProviderBaseUrl == null
       ? -1
       : protocolProviders.findIndex(
-          (p) => p.baseUrl === cfg.apiProviderBaseUrl && p.baseUrl === cfg.baseUrl,
-        );
+        (p) => p.baseUrl === cfg.apiProviderBaseUrl && p.baseUrl === cfg.baseUrl,
+      );
   const selectedProvider = selectedProviderIndex >= 0 ? protocolProviders[selectedProviderIndex] : undefined;
-  const isLongVan = selectedProvider?.label === 'LongVan AI (Mặc định)';
   const apiModelOptions = useMemo(
     () => Array.from(new Set(
       selectedProvider?.models?.length
@@ -496,301 +502,307 @@ export function SettingsDialog({
             </button>
           </aside>
           <div className="settings-content">
-          {activeSection === 'execution' ? (
-            <>
-              <div
-                className="protocol-chips"
-                role="tablist"
-                aria-label={t('settings.protocolAria')}
-              >
-                {API_PROTOCOL_TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={apiProtocol === tab.id}
-                    className={'protocol-chip' + (apiProtocol === tab.id ? ' active' : '')}
-                    onClick={() => setApiProtocol(tab.id)}
-                  >
-                    {tab.title}
-                  </button>
-                ))}
-              </div>
-
-            <section className="settings-section">
-              <div className="section-head">
-                <div>
-                  <h3>{API_PROTOCOL_LABELS[apiProtocol]}</h3>
-                </div>
-              </div>
-              <label className="field">
-                <span className="field-label">{t('settings.quickFillProvider')}</span>
-                <select
-                  value={selectedProviderIndex >= 0 ? String(selectedProviderIndex) : ''}
-                  onChange={(e) => {
-                    if (e.target.value === '') {
-                      updateApiConfig({
-                        baseUrl: '',
-                        model: '',
-                        apiProviderBaseUrl: null,
-                      });
-                      return;
-                    }
-                    const idx = Number(e.target.value);
-                    if (!isNaN(idx) && protocolProviders[idx]) {
-                      const p = protocolProviders[idx]!;
-                      updateApiConfig({
-                        baseUrl: p.baseUrl,
-                        model: p.model,
-                        apiProviderBaseUrl: p.baseUrl,
-                      });
-                    }
-                  }}
-                >
-                  <option value="">{t('settings.customProvider')}</option>
-                  {protocolProviders.map((p, i) => (
-                    <option key={p.label} value={i}>{p.label}</option>
-                  ))}
-                </select>
-              </label>
-              {!isLongVan ? (
-                <label className="field">
-                  <span className="field-label">{t('settings.apiKey')}</span>
-                  <div className="field-row">
-                    <input
-                      type={showApiKey ? 'text' : 'password'}
-                      placeholder={API_KEY_PLACEHOLDERS[apiProtocol]}
-                      value={cfg.apiKey}
-                      onChange={(e) => updateApiConfig({ apiKey: e.target.value })}
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      className="ghost icon-btn"
-                      onClick={() => setShowApiKey((v) => !v)}
-                      title={
-                        showApiKey ? t('settings.hideKey') : t('settings.showKey')
-                      }
-                    >
-                      {showApiKey ? t('settings.hide') : t('settings.show')}
-                    </button>
-                  </div>
-                </label>
-              ) : null}
-              <label className="field">
-                <span className="field-label">
-                  {apiProtocol === 'azure'
-                    ? t('settings.azureDeploymentModel')
-                    : t('settings.model')}
-                </span>
-                <select
-                  value={apiModelSelectValue}
-                  onChange={(e) => {
-                    if (e.target.value === CUSTOM_MODEL_SENTINEL) {
-                      updateApiConfig({ model: '' });
-                    } else {
-                      updateApiConfig({ model: e.target.value });
-                    }
-                  }}
-                >
-                  {apiModelOptions.map((m) => (
-                    <option value={m} key={m}>{m}</option>
-                  ))}
-                  <option value={CUSTOM_MODEL_SENTINEL}>{t('settings.modelCustom')}</option>
-                </select>
-              </label>
-              {!selectedProvider ? (
-                <p className="hint">{t('settings.suggestedModelsHint')}</p>
-              ) : null}
-              {apiProtocol === 'azure' ? (
-                <p className="hint">{t('settings.azureDeploymentModelHint')}</p>
-              ) : null}
-              {!isLongVan && (apiModelCustom || apiModelSelectValue === CUSTOM_MODEL_SENTINEL) ? (
-                <label className="field">
-                  <span className="field-label">{t('settings.modelCustomLabel')}</span>
-                  <input
-                    type="text"
-                    value={cfg.model}
-                    placeholder={t('settings.modelCustomPlaceholder')}
-                    onChange={(e) => updateApiConfig({ model: e.target.value.trim() })}
-                  />
-                </label>
-              ) : null}
-              {!isLongVan ? (
-                <label className="field">
-                  <span className="field-label">{t('settings.baseUrl')}</span>
-                  <input
-                    type="url"
-                    inputMode="url"
-                    value={cfg.baseUrl}
-                    aria-invalid={baseUrlInvalid || undefined}
-                    aria-describedby={
-                      baseUrlInvalid ? 'settings-base-url-error' : undefined
-                    }
-                    onChange={(e) => updateApiConfig({ baseUrl: e.target.value, apiProviderBaseUrl: null })}
-                  />
-                  {baseUrlInvalid ? (
-                    <span
-                      id="settings-base-url-error"
-                      className="settings-field-error"
-                      role="alert"
-                    >
-                      {t('settings.baseUrlInvalid')}
-                    </span>
-                  ) : null}
-                </label>
-              ) : null}
-              {apiProtocol === 'azure' ? (
-                <label className="field">
-                  <span className="field-label">{t('settings.apiVersion')}</span>
-                  <input
-                    type="text"
-                    value={cfg.apiVersion ?? ''}
-                    placeholder="2024-10-21"
-                    onChange={(e) => updateApiConfig({ apiVersion: e.target.value.trim() })}
-                  />
-                </label>
-              ) : null}
-              <p className="hint">{t('settings.apiHint')}</p>
-            </section>
-
-            </>
-          ) : null}
-
-          {activeSection === 'media' ? <MediaProvidersSection cfg={cfg} setCfg={setCfg} /> : null}
-          {activeSection === 'integrations' ? <IntegrationsSection /> : null}
-
-          {activeSection === 'language' ? (
-          <section className="settings-section">
-            <div className="section-head">
-              <div>
-                <h3>{t('settings.language')}</h3>
-                <p className="hint">{t('settings.languageHint')}</p>
-              </div>
-            </div>
-            <div className="settings-language-picker" ref={languageRef}>
-              <button
-                type="button"
-                className="settings-language-button"
-                aria-haspopup="menu"
-                aria-expanded={languageOpen}
-                onClick={() => setLanguageOpen((v) => !v)}
-              >
-                <span className="settings-language-icon" aria-hidden="true">
-                  <Icon name="languages" size={22} strokeWidth={1.8} />
-                </span>
-                <span className="settings-language-text">
-                  <span className="settings-language-title">
-                    {LOCALE_LABEL[locale]}
-                  </span>
-                  <span className="settings-language-code">{locale}</span>
-                </span>
-                <Icon name="chevron-down" size={16} />
-              </button>
-              {languageOpen && languageMenuRect ? (() => {
-                const spaceBelow = window.innerHeight - languageMenuRect.bottom;
-                const spaceAbove = languageMenuRect.top;
-                // Prefer downward if at least 200px available (enough for ~5 options)
-                const openDownward = spaceBelow >= spaceAbove || spaceBelow >= 200;
-                return (
+            {activeSection === 'execution' ? (
+              <>
                 <div
-                  className="settings-language-menu"
-                  role="menu"
-                  style={{
-                    top: openDownward ? languageMenuRect.bottom + 6 : undefined,
-                    bottom: openDownward
-                      ? undefined
-                      : window.innerHeight - languageMenuRect.top + 6,
-                    left: languageMenuRect.left,
-                    width: languageMenuRect.width,
-                    '--menu-available-h': `${(openDownward ? spaceBelow : spaceAbove) - 6}px`,
-                  } as React.CSSProperties}
+                  className="protocol-chips"
+                  role="tablist"
+                  aria-label={t('settings.protocolAria')}
                 >
-                  {LOCALES.map((code) => {
-                    const active = locale === code;
-                    return (
-                      <button
-                        key={code}
-                        type="button"
-                        role="menuitemradio"
-                        aria-checked={active}
-                        className={`settings-language-option${active ? ' active' : ''}`}
-                        onClick={() => {
-                          setLocale(code as Locale);
-                          setLanguageOpen(false);
+                  {API_PROTOCOL_TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={apiProtocol === tab.id}
+                      className={'protocol-chip' + (apiProtocol === tab.id ? ' active' : '')}
+                      onClick={() => setApiProtocol(tab.id)}
+                    >
+                      {tab.title}
+                    </button>
+                  ))}
+                </div>
+
+                <section className="settings-section">
+                  <div className="section-head">
+                    <div>
+                      <h3>{API_PROTOCOL_LABELS[apiProtocol]}</h3>
+                    </div>
+                  </div>
+                  {apiProtocol !== 'macdinh' ? (
+                    <label className="field">
+                      <span className="field-label">{t('settings.quickFillProvider')}</span>
+                      <select
+                        value={selectedProviderIndex >= 0 ? String(selectedProviderIndex) : ''}
+                        onChange={(e) => {
+                          if (e.target.value === '') {
+                            updateApiConfig({
+                              baseUrl: '',
+                              model: '',
+                              apiProviderBaseUrl: null,
+                            });
+                            return;
+                          }
+                          const idx = Number(e.target.value);
+                          if (!isNaN(idx) && protocolProviders[idx]) {
+                            const p = protocolProviders[idx];
+                            updateApiConfig({
+                              baseUrl: p.baseUrl,
+                              model: p.model,
+                              apiProviderBaseUrl: p.baseUrl,
+                            });
+                          }
                         }}
                       >
-                        <span>
-                          <span className="settings-language-option-title">
-                            {LOCALE_LABEL[code]}
-                          </span>
-                          <span className="settings-language-option-code">
-                            {code}
-                          </span>
+                        <option value="">{t('settings.customProvider')}</option>
+                        {protocolProviders.map((p, i) => (
+                          <option key={p.label} value={i}>{p.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null}
+                  {apiProtocol !== 'macdinh' ? (
+                    <label className="field">
+                      <span className="field-label">{t('settings.apiKey')}</span>
+                      <div className="field-row">
+                        <input
+                          type={showApiKey ? 'text' : 'password'}
+                          placeholder={API_KEY_PLACEHOLDERS[apiProtocol]}
+                          value={cfg.apiKey}
+                          onChange={(e) => updateApiConfig({ apiKey: e.target.value })}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          className="ghost icon-btn"
+                          onClick={() => setShowApiKey((v) => !v)}
+                          title={
+                            showApiKey ? t('settings.hideKey') : t('settings.showKey')
+                          }
+                        >
+                          {showApiKey ? t('settings.hide') : t('settings.show')}
+                        </button>
+                      </div>
+                    </label>
+                  ) : null}
+                  <label className="field">
+                    <span className="field-label">
+                      {apiProtocol === 'azure'
+                        ? t('settings.azureDeploymentModel')
+                        : t('settings.model')}
+                    </span>
+                    <select
+                      value={apiModelSelectValue}
+                      onChange={(e) => {
+                        if (e.target.value === CUSTOM_MODEL_SENTINEL) {
+                          updateApiConfig({ model: '' });
+                        } else {
+                          updateApiConfig({ model: e.target.value });
+                        }
+                      }}
+                    >
+                      {apiModelOptions.map((m) => (
+                        <option value={m} key={m}>{m}</option>
+                      ))}
+                      {apiProtocol !== 'macdinh' ? (
+                        <option value={CUSTOM_MODEL_SENTINEL}>{t('settings.modelCustom')}</option>
+                      ) : null}
+                    </select>
+                  </label>
+                  {!selectedProvider && apiProtocol !== 'macdinh' ? (
+                    <p className="hint">{t('settings.suggestedModelsHint')}</p>
+                  ) : null}
+                  {apiProtocol === 'azure' ? (
+                    <p className="hint">{t('settings.azureDeploymentModelHint')}</p>
+                  ) : null}
+                  {apiModelCustom || apiModelSelectValue === CUSTOM_MODEL_SENTINEL ? (
+                    <label className="field">
+                      <span className="field-label">{t('settings.modelCustomLabel')}</span>
+                      <input
+                        type="text"
+                        value={cfg.model}
+                        placeholder={t('settings.modelCustomPlaceholder')}
+                        onChange={(e) => updateApiConfig({ model: e.target.value.trim() })}
+                      />
+                    </label>
+                  ) : null}
+                  {apiProtocol !== 'macdinh' ? (
+                    <label className="field">
+                      <span className="field-label">{t('settings.baseUrl')}</span>
+                      <input
+                        type="url"
+                        inputMode="url"
+                        value={cfg.baseUrl}
+                        aria-invalid={baseUrlInvalid || undefined}
+                        aria-describedby={
+                          baseUrlInvalid ? 'settings-base-url-error' : undefined
+                        }
+                        onChange={(e) => updateApiConfig({ baseUrl: e.target.value, apiProviderBaseUrl: null })}
+                      />
+                      {baseUrlInvalid ? (
+                        <span
+                          id="settings-base-url-error"
+                          className="settings-field-error"
+                          role="alert"
+                        >
+                          {t('settings.baseUrlInvalid')}
                         </span>
-                        {active ? <Icon name="check" size={16} /> : null}
-                      </button>
+                      ) : null}
+                    </label>
+                  ) : null}
+                  {apiProtocol === 'azure' ? (
+                    <label className="field">
+                      <span className="field-label">{t('settings.apiVersion')}</span>
+                      <input
+                        type="text"
+                        value={cfg.apiVersion ?? ''}
+                        placeholder="2024-10-21"
+                        onChange={(e) => updateApiConfig({ apiVersion: e.target.value.trim() })}
+                      />
+                    </label>
+                  ) : null}
+                  {apiProtocol !== 'macdinh' ? (
+                    <p className="hint">{t('settings.apiHint')}</p>
+                  ) : null}
+                </section>
+
+              </>
+            ) : null}
+
+            {activeSection === 'media' ? <MediaProvidersSection cfg={cfg} setCfg={setCfg} /> : null}
+            {activeSection === 'integrations' ? <IntegrationsSection /> : null}
+
+            {activeSection === 'language' ? (
+              <section className="settings-section">
+                <div className="section-head">
+                  <div>
+                    <h3>{t('settings.language')}</h3>
+                    <p className="hint">{t('settings.languageHint')}</p>
+                  </div>
+                </div>
+                <div className="settings-language-picker" ref={languageRef}>
+                  <button
+                    type="button"
+                    className="settings-language-button"
+                    aria-haspopup="menu"
+                    aria-expanded={languageOpen}
+                    onClick={() => setLanguageOpen((v) => !v)}
+                  >
+                    <span className="settings-language-icon" aria-hidden="true">
+                      <Icon name="languages" size={22} strokeWidth={1.8} />
+                    </span>
+                    <span className="settings-language-text">
+                      <span className="settings-language-title">
+                        {LOCALE_LABEL[locale]}
+                      </span>
+                      <span className="settings-language-code">{locale}</span>
+                    </span>
+                    <Icon name="chevron-down" size={16} />
+                  </button>
+                  {languageOpen && languageMenuRect ? (() => {
+                    const spaceBelow = window.innerHeight - languageMenuRect.bottom;
+                    const spaceAbove = languageMenuRect.top;
+                    // Prefer downward if at least 200px available (enough for ~5 options)
+                    const openDownward = spaceBelow >= spaceAbove || spaceBelow >= 200;
+                    return (
+                      <div
+                        className="settings-language-menu"
+                        role="menu"
+                        style={{
+                          top: openDownward ? languageMenuRect.bottom + 6 : undefined,
+                          bottom: openDownward
+                            ? undefined
+                            : window.innerHeight - languageMenuRect.top + 6,
+                          left: languageMenuRect.left,
+                          width: languageMenuRect.width,
+                          '--menu-available-h': `${(openDownward ? spaceBelow : spaceAbove) - 6}px`,
+                        } as React.CSSProperties}
+                      >
+                        {LOCALES.map((code) => {
+                          const active = locale === code;
+                          return (
+                            <button
+                              key={code}
+                              type="button"
+                              role="menuitemradio"
+                              aria-checked={active}
+                              className={`settings-language-option${active ? ' active' : ''}`}
+                              onClick={() => {
+                                setLocale(code as Locale);
+                                setLanguageOpen(false);
+                              }}
+                            >
+                              <span>
+                                <span className="settings-language-option-title">
+                                  {LOCALE_LABEL[code]}
+                                </span>
+                                <span className="settings-language-option-code">
+                                  {code}
+                                </span>
+                              </span>
+                              {active ? <Icon name="check" size={16} /> : null}
+                            </button>
+                          );
+                        })}
+                      </div>
                     );
-                  })}
+                  })() : null}
                 </div>
-                );
-              })() : null}
-            </div>
-          </section>
-          ) : null}
+              </section>
+            ) : null}
 
-          {activeSection === 'appearance' ? (
-            <AppearanceSection cfg={cfg} setCfg={setCfg} />
-          ) : null}
+            {activeSection === 'appearance' ? (
+              <AppearanceSection cfg={cfg} setCfg={setCfg} />
+            ) : null}
 
-          {activeSection === 'notifications' ? (
-            <NotificationsSection cfg={cfg} setCfg={setCfg} />
-          ) : null}
+            {activeSection === 'notifications' ? (
+              <NotificationsSection cfg={cfg} setCfg={setCfg} />
+            ) : null}
 
-          {activeSection === 'pet' ? (
-            <PetSettings cfg={cfg} setCfg={setCfg} />
-          ) : null}
+            {activeSection === 'pet' ? (
+              <PetSettings cfg={cfg} setCfg={setCfg} />
+            ) : null}
 
-          {activeSection === 'about' ? (
-            <section className="settings-section">
-              <div className="section-head">
-                <div>
-                  <h3>{t('settings.about')}</h3>
-                  <p className="hint">{t('settings.aboutHint')}</p>
+            {activeSection === 'about' ? (
+              <section className="settings-section">
+                <div className="section-head">
+                  <div>
+                    <h3>{t('settings.about')}</h3>
+                    <p className="hint">{t('settings.aboutHint')}</p>
+                  </div>
                 </div>
-              </div>
-              {appVersionInfo ? (
-                <dl className="settings-about-list">
-                  <div>
-                    <dt>{t('settings.appVersion')}</dt>
-                    <dd>{appVersionInfo.version}</dd>
-                  </div>
-                  <div>
-                    <dt>{t('settings.appChannel')}</dt>
-                    <dd>{appVersionInfo.channel}</dd>
-                  </div>
-                  <div>
-                    <dt>{t('settings.appRuntime')}</dt>
-                    <dd>
-                      {appVersionInfo.packaged
-                        ? t('settings.runtimePackaged')
-                        : t('settings.runtimeDevelopment')}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>{t('settings.appPlatform')}</dt>
-                    <dd>{appVersionInfo.platform}</dd>
-                  </div>
-                  <div>
-                    <dt>{t('settings.appArchitecture')}</dt>
-                    <dd>{appVersionInfo.arch}</dd>
-                  </div>
-                </dl>
-              ) : (
-                <div className="empty-card">{t('settings.versionUnavailable')}</div>
-              )}
-            </section>
-          ) : null}
+                {appVersionInfo ? (
+                  <dl className="settings-about-list">
+                    <div>
+                      <dt>{t('settings.appVersion')}</dt>
+                      <dd>{appVersionInfo.version}</dd>
+                    </div>
+                    <div>
+                      <dt>{t('settings.appChannel')}</dt>
+                      <dd>{appVersionInfo.channel}</dd>
+                    </div>
+                    <div>
+                      <dt>{t('settings.appRuntime')}</dt>
+                      <dd>
+                        {appVersionInfo.packaged
+                          ? t('settings.runtimePackaged')
+                          : t('settings.runtimeDevelopment')}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{t('settings.appPlatform')}</dt>
+                      <dd>{appVersionInfo.platform}</dd>
+                    </div>
+                    <div>
+                      <dt>{t('settings.appArchitecture')}</dt>
+                      <dd>{appVersionInfo.arch}</dd>
+                    </div>
+                  </dl>
+                ) : (
+                  <div className="empty-card">{t('settings.versionUnavailable')}</div>
+                )}
+              </section>
+            ) : null}
           </div>
         </div>
 

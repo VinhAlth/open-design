@@ -36,7 +36,7 @@ import type {
 } from '@open-design/contracts';
 
 export type ExecMode = 'daemon' | 'api';
-export type ApiProtocol = 'anthropic' | 'openai' | 'azure' | 'google';
+export type ApiProtocol = 'macdinh' | 'anthropic' | 'openai' | 'azure' | 'google';
 
 export interface MediaProviderCredentials {
   apiKey: string;

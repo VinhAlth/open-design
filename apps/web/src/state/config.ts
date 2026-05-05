@@ -43,16 +43,16 @@ export const DEFAULT_PET: PetConfig = {
 export const DEFAULT_CONFIG: AppConfig = {
   mode: 'daemon',
   apiKey: '',
-  baseUrl: '',
+  baseUrl: 'macdinh-ai',
   model: 'gpt-5.4-nano',
   // New configs should be explicit. loadConfig() still detects parsed legacy
   // saved configs that did not have this field and migrates those from their
   // saved baseUrl/model before applying the current migration version.
-  apiProtocol: 'openai',
+  apiProtocol: 'macdinh',
   apiVersion: '',
   apiProtocolConfigs: {},
   configMigrationVersion: CONFIG_MIGRATION_VERSION,
-  apiProviderBaseUrl: '',
+  apiProviderBaseUrl: 'macdinh-ai',
   agentId: null,
   skillId: null,
   designSystemId: null,
@@ -88,8 +88,8 @@ export interface KnownProvider {
 export const KNOWN_PROVIDERS: KnownProvider[] = [
   {
     label: 'Mặc định',
-    protocol: 'openai',
-    baseUrl: '',
+    protocol: 'macdinh',
+    baseUrl: 'macdinh-ai',
     model: 'gpt-5.4-nano',
     models: ['gpt-5.4-nano', 'gpt-5.4-mini'],
   },

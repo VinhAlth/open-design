@@ -704,7 +704,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
   // Warm agent-capability probes (e.g. whether the installed Claude Code
   // build advertises --include-partial-messages) so the first /api/chat
   // hits a populated cache even if /api/agents hasn't been called yet.
-  void detectAgents().catch(() => {});
+  void detectAgents().catch(() => { });
 
   if (fs.existsSync(STATIC_DIR)) {
     app.use(express.static(STATIC_DIR));
@@ -875,7 +875,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
           ...project,
           status: composeProjectDisplayStatus(
             activeRunStatuses.get(project.id) ??
-              latestRunStatuses.get(project.id) ?? { value: 'not_started' },
+            latestRunStatuses.get(project.id) ?? { value: 'not_started' },
             awaitingInputProjects,
             project.id,
           ),
@@ -978,7 +978,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
         const originalName =
           req.file.originalname || 'Claude Design export.zip';
         if (!/\.zip$/i.test(originalName)) {
-          fs.promises.unlink(req.file.path).catch(() => {});
+          fs.promises.unlink(req.file.path).catch(() => { });
           return res.status(400).json({ error: 'expected a .zip file' });
         }
         const id = randomId();
@@ -989,7 +989,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
           req.file.path,
           projectDir(PROJECTS_DIR, id),
         );
-        fs.promises.unlink(req.file.path).catch(() => {});
+        fs.promises.unlink(req.file.path).catch(() => { });
 
         const project = insertProject(db, {
           id,
@@ -1022,7 +1022,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
           files: imported.files,
         });
       } catch (err) {
-        if (req.file?.path) fs.promises.unlink(req.file.path).catch(() => {});
+        if (req.file?.path) fs.promises.unlink(req.file.path).catch(() => { });
         res.status(400).json({ error: String(err) });
       }
     },
@@ -1054,7 +1054,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
   app.delete('/api/projects/:id', async (req, res) => {
     try {
       dbDeleteProject(db, req.params.id);
-      await removeProjectDir(PROJECTS_DIR, req.params.id).catch(() => {});
+      await removeProjectDir(PROJECTS_DIR, req.params.id).catch(() => { });
       /** @type {import('@open-design/contracts').OkResponse} */
       const body = { ok: true };
       res.json(body);
@@ -1080,18 +1080,18 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
       sub = subscribeFileEvents(PROJECTS_DIR, req.params.id, (evt) => {
         sse.send('file-changed', evt);
       });
-      sub.ready.then(() => sse.send('ready', { projectId: req.params.id })).catch(() => {});
+      sub.ready.then(() => sse.send('ready', { projectId: req.params.id })).catch(() => { });
       const cleanup = () => {
         if (sub) {
           const { unsubscribe } = sub;
           sub = null;
-          Promise.resolve(unsubscribe()).catch(() => {});
+          Promise.resolve(unsubscribe()).catch(() => { });
         }
       };
       res.on('close', cleanup);
       res.on('finish', cleanup);
     } catch (err) {
-      if (sub) Promise.resolve(sub.unsubscribe()).catch(() => {});
+      if (sub) Promise.resolve(sub.unsubscribe()).catch(() => { });
       if (!res.headersSent) sendApiError(res, 400, 'BAD_REQUEST', String(err?.message || err));
     }
   });
@@ -1847,7 +1847,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
           statusMessage: result.reachable
             ? 'Public link is ready.'
             : result.statusMessage ||
-              'Vercel is still preparing the public link.',
+            'Vercel is still preparing the public link.',
           reachableAt: result.reachable ? now : existing.reachableAt,
           updatedAt: now,
         });
@@ -2099,7 +2099,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
             desiredName,
             buf,
           );
-          fs.promises.unlink(req.file.path).catch(() => {});
+          fs.promises.unlink(req.file.path).catch(() => { });
           /** @type {import('@open-design/contracts').ProjectFileResponse} */
           const body = { file: meta };
           return res.json(body);
@@ -2249,9 +2249,9 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
       });
       console.error(
         `[task ${taskId.slice(0, 8)}] queued model=${req.body?.model} ` +
-          `surface=${req.body?.surface} ` +
-          `image=${req.body?.image ? 'yes' : 'no'} ` +
-          `compositionDir=${req.body?.compositionDir ? 'yes' : 'no'}`,
+        `surface=${req.body?.surface} ` +
+        `image=${req.body?.image ? 'yes' : 'no'} ` +
+        `compositionDir=${req.body?.compositionDir ? 'yes' : 'no'}`,
       );
 
       task.status = 'running';
@@ -2283,7 +2283,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
           notifyTaskWaiters(task);
           console.error(
             `[task ${taskId.slice(0, 8)}] done size=${meta?.size} mime=${meta?.mime} ` +
-              `elapsed=${Math.round((task.endedAt - task.startedAt) / 1000)}s`,
+            `elapsed=${Math.round((task.endedAt - task.startedAt) / 1000)}s`,
           );
         })
         .catch((err) => {
@@ -2297,7 +2297,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
           notifyTaskWaiters(task);
           console.error(
             `[task ${taskId.slice(0, 8)}] failed status=${task.error.status} ` +
-              `message=${(task.error.message || '').slice(0, 240)}`,
+            `message=${(task.error.message || '').slice(0, 240)}`,
           );
         });
 
@@ -2591,18 +2591,18 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
     // to Read it.
     const safeAttachments = cwd
       ? (Array.isArray(attachments) ? attachments : [])
-          .filter((p) => typeof p === 'string' && p.length > 0)
-          .filter((p) => {
-            try {
-              const abs = path.resolve(cwd, p);
-              return (
-                (abs === cwd || abs.startsWith(cwd + path.sep)) &&
-                fs.existsSync(abs)
-              );
-            } catch {
-              return false;
-            }
-          })
+        .filter((p) => typeof p === 'string' && p.length > 0)
+        .filter((p) => {
+          try {
+            const abs = path.resolve(cwd, p);
+            return (
+              (abs === cwd || abs.startsWith(cwd + path.sep)) &&
+              fs.existsSync(abs)
+            );
+          } catch {
+            return false;
+          }
+        })
       : [];
 
     // Local code agents don't accept a separate "system" channel the way the
@@ -2615,8 +2615,8 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
     // filename instead of clobbering a previous artifact.
     const filesListBlock = existingProjectFiles.length
       ? `\nFiles already in this folder (do NOT overwrite unless the user asks; pick a fresh, descriptive name for new artifacts):\n${existingProjectFiles
-          .map((f) => `- ${f.name}`)
-          .join('\n')}`
+        .map((f) => `- ${f.name}`)
+        .join('\n')}`
       : '\nThis folder is empty. Choose a clear, descriptive filename for whatever you create.';
     const cwdHint = cwd
       ? `\n\nYour working directory: ${cwd}\nWrite project files relative to it (e.g. \`index.html\`, \`assets/x.png\`). The user can browse those files in real time.${filesListBlock}`
@@ -2746,7 +2746,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
         createSseErrorPayload(
           'AGENT_UNAVAILABLE',
           `Agent "${def.name}" (\`${def.bin}\`) is not installed or not on PATH. ` +
-            'Install it and refresh the agent list (GET /api/agents) before retrying.',
+          'Install it and refresh the agent list (GET /api/agents) before retrying.',
           { retryable: true },
         ),
       );
@@ -2823,9 +2823,9 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
       OD_DAEMON_URL: `http://127.0.0.1:${resolvedPort}`,
       ...(typeof projectId === 'string' && projectId && cwd
         ? {
-            OD_PROJECT_ID: projectId,
-            OD_PROJECT_DIR: cwd,
-          }
+          OD_PROJECT_ID: projectId,
+          OD_PROJECT_DIR: cwd,
+        }
         : {}),
     };
 
@@ -3267,7 +3267,8 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
   app.post('/api/proxy/openai/stream', async (req, res) => {
     /** @type {Partial<ProxyStreamRequest>} */
     const proxyBody = req.body || {};
-    const baseUrl = proxyBody.baseUrl || process.env.DEFAULT_OPENAI_BASE_URL || 'https://api.openai.com';
+    let baseUrl = proxyBody.baseUrl || process.env.DEFAULT_OPENAI_BASE_URL || 'https://api.openai.com/v1';
+    if (baseUrl === 'macdinh-ai') baseUrl = process.env.DEFAULT_OPENAI_BASE_URL || 'https://api.openai.com/v1';
     const apiKey = proxyBody.apiKey || process.env.DEFAULT_OPENAI_API_KEY;
     const model = proxyBody.model || process.env.DEFAULT_OPENAI_MODEL || 'gpt-4o';
     const { systemPrompt, messages, maxTokens } = proxyBody;
