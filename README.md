@@ -6,17 +6,25 @@
 
 ---
 
-## 🌟 Giới thiệu Dự án
+## 🌟 Giới thiệu Dự án & Mục đích
 
-**Design AI** là một hệ thống mạnh mẽ giúp chuyển đổi ngôn ngữ tự nhiên thành mã nguồn giao diện (HTML/CSS/JS/React) ngay lập tức. Được phát triển dựa trên lõi kiến trúc của dự án **[Open Design](https://github.com/nexu-io/open-design)**, phiên bản này đã được chúng tôi **chắt lọc, loại bỏ các tính năng phức tạp** (như hệ thống luồng Agent đa nhiệm) để tập trung duy nhất vào một trải nghiệm cốt lõi: **Thiết kế UI tốc độ cao**.
+**Design AI** là một hệ thống mạnh mẽ giúp chuyển đổi ngôn ngữ tự nhiên thành mã nguồn giao diện (HTML/CSS/JS/React) ngay lập tức. Dự án này là một bản phân nhánh (fork) và tùy biến sâu từ dự án gốc **[Open Design](https://github.com/nexu-io/open-design)**. 
 
-Bên cạnh sự tinh gọn, Design AI được trang bị hệ thống **Backend Proxy bảo mật**, giúp giấu hoàn toàn API Key trên máy chủ. Điều này cho phép bạn triển khai một nền tảng tạo giao diện công cộng cho đội ngũ hoặc khách hàng mà không lo rủi ro rò rỉ mã khóa API.
+**Tại sao phiên bản này ra đời?**
+Thay vì giữ lại toàn bộ hệ sinh thái đa tác vụ phức tạp của bản gốc, phiên bản này được tạo ra dành riêng cho những ai muốn tự host (triển khai cá nhân/doanh nghiệp) một công cụ AI tạo UI cực kỳ đơn giản. Những thay đổi chính mà chúng tôi đã thực hiện trên mã nguồn gốc bao gồm:
+1. **Lược bỏ các thành phần dư thừa:** Dẹp bỏ hệ thống luồng Agent phức tạp, chỉ tập trung 100% vào việc Thiết kế Web UI.
+2. **Đơn giản hóa giao diện (Clean UI):** Loại bỏ các nút bấm và menu không cần thiết để tạo ra trải nghiệm tối giản nhất.
+3. **Bản địa hóa (Localization):** Dịch thuật và tích hợp giao diện Tiếng Việt hoàn chỉnh.
+4. **Hệ thống "My Team" (Mặc định):** Bổ sung cấu hình nhà cung cấp AI trung tâm (My AI / Proxy), giấu API Key ở Backend để chủ server có thể chia sẻ công cụ cho đội nhóm sử dụng chung mà không lộ Key.
+5. **Cài đặt 1-Click (1-Click Deploy):** Tích hợp Script tự động cấu hình Nginx, SSL, SystemD, giúp bất kỳ ai cũng có thể triển khai hệ thống Open Design thu gọn này lên Domain riêng chỉ với một câu lệnh.
+
+Chúng tôi không nhận quyền sở hữu lõi kiến trúc, dự án này chỉ đóng vai trò là một **bản tinh chỉnh chuyên biệt** để phục vụ tốt nhất cho cộng đồng thiết kế UI và những người muốn tự host máy chủ riêng.
 
 ---
 
 ## 🚀 Các Tính Năng Cốt Lõi
 
-- **Tối Ưu Hóa Cho UI/UX:** Giao diện người dùng được tinh chỉnh, thân thiện và tập trung tối đa vào luồng công việc thiết kế Web.
+- **Tối Ưu Hóa Cho UI/UX:** Giao diện người dùng được tinh chỉnh, thân thiện và bằng Tiếng Việt.
 - **Bảo Mật Bằng Proxy Phía Máy Chủ:** Khóa API của nhà cung cấp (OpenAI, Anthropic, v.v.) được lưu trữ an toàn trong biến môi trường tại Backend. Trình duyệt của người dùng cuối hoàn toàn không có quyền truy cập vào thông tin này.
 - **Thiết Lập "My AI":** Cấu hình nhà cung cấp AI trung tâm với quyền ưu tiên cao nhất, hỗ trợ các mô hình ngôn ngữ hàng đầu (`gpt-5.4-nano`, `gpt-4o`, `claude-3-5-sonnet-latest`). Hỗ trợ người dùng tự nhập ID Model mong muốn.
 - **Triển Khai Tự Động (1-Click Deploy):** Tích hợp sẵn Script Bash tự động cài đặt từ A-Z (Node.js, Pnpm, Nginx, SSL Let's Encrypt, và Systemd Service) chỉ với một dòng lệnh duy nhất.
