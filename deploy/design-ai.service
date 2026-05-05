@@ -1,0 +1,29 @@
+[Unit]
+Description=Design AI Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/user/design-ai
+
+# Start the daemon directly - it serves static files + API
+ExecStart=/usr/local/bin/pnpm tools-dev run web
+
+Restart=always
+RestartSec=5
+
+Environment=NODE_ENV=production
+Environment=OD_PORT=7456
+Environment=OD_BIND_HOST=127.0.0.1
+Environment=OD_DATA_DIR=/home/user/design-ai-data
+Environment=OD_MEDIA_ALLOW_STUBS=1
+Environment=OD_CODEX_DISABLE_PLUGINS=1
+
+# Cấu hình API Backend (sẽ dùng chung cho User nếu setup My AI)
+Environment=DEFAULT_OPENAI_API_KEY="sk-nhap-key-vao-day"
+Environment=DEFAULT_OPENAI_BASE_URL="https://api.openai.com/v1"
+Environment=DEFAULT_OPENAI_MODEL="gpt-4o"
+
+[Install]
+WantedBy=multi-user.target
