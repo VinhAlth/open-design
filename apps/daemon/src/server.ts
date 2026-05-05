@@ -3267,8 +3267,10 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
   app.post('/api/proxy/openai/stream', async (req, res) => {
     /** @type {Partial<ProxyStreamRequest>} */
     const proxyBody = req.body || {};
-    const { baseUrl, apiKey, model, systemPrompt, messages, maxTokens } =
-      proxyBody;
+    const baseUrl = proxyBody.baseUrl || process.env.DEFAULT_OPENAI_BASE_URL || 'https://api.openai.com';
+    const apiKey = proxyBody.apiKey || process.env.DEFAULT_OPENAI_API_KEY;
+    const model = proxyBody.model || process.env.DEFAULT_OPENAI_MODEL || 'gpt-4o';
+    const { systemPrompt, messages, maxTokens } = proxyBody;
     if (!baseUrl || !apiKey || !model) {
       return sendApiError(
         res,

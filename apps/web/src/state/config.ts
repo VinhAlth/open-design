@@ -43,16 +43,16 @@ export const DEFAULT_PET: PetConfig = {
 export const DEFAULT_CONFIG: AppConfig = {
   mode: 'daemon',
   apiKey: '',
-  baseUrl: 'https://api.anthropic.com',
-  model: 'claude-sonnet-4-5',
+  baseUrl: '',
+  model: 'gpt-5.4-nano',
   // New configs should be explicit. loadConfig() still detects parsed legacy
   // saved configs that did not have this field and migrates those from their
   // saved baseUrl/model before applying the current migration version.
-  apiProtocol: 'anthropic',
+  apiProtocol: 'openai',
   apiVersion: '',
   apiProtocolConfigs: {},
   configMigrationVersion: CONFIG_MIGRATION_VERSION,
-  apiProviderBaseUrl: 'https://api.anthropic.com',
+  apiProviderBaseUrl: '',
   agentId: null,
   skillId: null,
   designSystemId: null,
@@ -86,6 +86,13 @@ export interface KnownProvider {
 // protocol that determines request routing, the base URL, a default model, and
 // optional provider-specific model choices.
 export const KNOWN_PROVIDERS: KnownProvider[] = [
+  {
+    label: 'Mặc định',
+    protocol: 'openai',
+    baseUrl: '',
+    model: 'gpt-5.4-nano',
+    models: ['gpt-5.4-nano', 'gpt-5.4-mini'],
+  },
   {
     label: 'Anthropic (Claude)',
     protocol: 'anthropic',

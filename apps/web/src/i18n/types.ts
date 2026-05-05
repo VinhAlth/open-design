@@ -142,6 +142,8 @@ export interface Dict {
   'settings.mediaProviderBaseUrlPlaceholder': string;
   'settings.about': string;
   'settings.aboutHint': string;
+  'settings.mcpServer': string;
+  'settings.mcpServerHint': string;
   'settings.appVersion': string;
   'settings.appChannel': string;
   'settings.appRuntime': string;

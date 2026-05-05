@@ -275,13 +275,12 @@ export function SettingsDialog({
     useState<RescanNotice | null>(null);
   const languageRef = useRef<HTMLDivElement | null>(null);
 
-  // If the daemon goes offline mid-edit, force API mode so the UI doesn't
-  // pretend Local CLI is selectable.
+  // We now force 'api' mode as the local CLI is disabled.
   useEffect(() => {
-    if (!daemonLive && cfg.mode === 'daemon') {
+    if (cfg.mode === 'daemon') {
       setCfg((c) => ({ ...c, mode: 'api' }));
     }
-  }, [daemonLive, cfg.mode]);
+  }, [cfg.mode]);
 
   useEffect(() => {
     if (!languageOpen) return;
@@ -369,6 +368,7 @@ export function SettingsDialog({
           (p) => p.baseUrl === cfg.apiProviderBaseUrl && p.baseUrl === cfg.baseUrl,
         );
   const selectedProvider = selectedProviderIndex >= 0 ? protocolProviders[selectedProviderIndex] : undefined;
+  const isLongVan = selectedProvider?.label === 'LongVan AI (Mặc định)';
   const apiModelOptions = useMemo(
     () => Array.from(new Set(
       selectedProvider?.models?.length
@@ -445,8 +445,8 @@ export function SettingsDialog({
             >
               <Icon name="link" size={18} />
               <span>
-                <strong>MCP server</strong>
-                <small>Connect your coding agent</small>
+                <strong>{t('settings.mcpServer')}</strong>
+                <small>{t('settings.mcpServerHint')}</small>
               </span>
             </button>
             <button
@@ -499,242 +499,24 @@ export function SettingsDialog({
           {activeSection === 'execution' ? (
             <>
               <div
-                className="seg-control"
+                className="protocol-chips"
                 role="tablist"
-                aria-label={t('settings.modeAria')}
-                style={{ ['--seg-cols' as string]: 1 } as CSSProperties}
+                aria-label={t('settings.protocolAria')}
               >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={cfg.mode === 'api'}
-                  className={'seg-btn' + (cfg.mode === 'api' ? ' active' : '')}
-                  onClick={() => setMode('api')}
-                >
-                  <span className="seg-title">{t('settings.modeApiMeta')}</span>
-                  <span className="seg-meta">{t('settings.modeApi')}</span>
-                </button>
+                {API_PROTOCOL_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={apiProtocol === tab.id}
+                    className={'protocol-chip' + (apiProtocol === tab.id ? ' active' : '')}
+                    onClick={() => setApiProtocol(tab.id)}
+                  >
+                    {tab.title}
+                  </button>
+                ))}
               </div>
-              {cfg.mode === 'api' ? (
-                <div
-                  className="protocol-chips"
-                  role="tablist"
-                  aria-label={t('settings.protocolAria')}
-                >
-                  {API_PROTOCOL_TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={apiProtocol === tab.id}
-                      className={'protocol-chip' + (apiProtocol === tab.id ? ' active' : '')}
-                      onClick={() => setApiProtocol(tab.id)}
-                    >
-                      {tab.title}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-          {cfg.mode === 'daemon' ? (
-            <section className="settings-section">
-              <div className="section-head">
-                <div>
-                  <h3>{t('settings.localCli')}</h3>
-                  <p className="hint">{t('settings.codeAgentHint')}</p>
-                </div>
-                <button
-                  type="button"
-                  className={
-                    'ghost icon-btn settings-rescan-btn' +
-                    (agentRescanRunning ? ' loading' : '')
-                  }
-                  onClick={() => void handleRefreshAgents()}
-                  disabled={agentRescanRunning}
-                  title={t('settings.rescanTitle')}
-                >
-                  {agentRescanRunning ? (
-                    <>
-                      <Icon name="spinner" size={13} className="icon-spin" />
-                      <span>{t('settings.rescanRunning')}</span>
-                    </>
-                  ) : (
-                    t('settings.rescan')
-                  )}
-                </button>
-              </div>
-              {agentRescanNotice ? (
-                <p
-                  className={
-                    'settings-rescan-status ' + agentRescanNotice.kind
-                  }
-                  role={
-                    agentRescanNotice.kind === 'error' ? 'alert' : 'status'
-                  }
-                >
-                  {agentRescanNotice.kind === 'success'
-                    ? t('settings.rescanSuccess', {
-                        count: agentRescanNotice.count,
-                      })
-                    : t('settings.rescanFailed')}
-                </p>
-              ) : null}
-              {agents.length === 0 ? (
-                <div className="empty-card">
-                  {t('settings.noAgentsDetected')}
-                </div>
-              ) : (
-                <div className="agent-grid">
-                  {agents.map((a) => {
-                    const active = cfg.agentId === a.id;
-                    return (
-                      <button
-                        type="button"
-                        key={a.id}
-                        className={
-                          'agent-card' +
-                          (active ? ' active' : '') +
-                          (a.available ? '' : ' disabled')
-                        }
-                        onClick={() =>
-                          a.available && setCfg((c) => ({ ...c, agentId: a.id }))
-                        }
-                        disabled={!a.available}
-                        aria-pressed={active}
-                      >
-                        <AgentIcon id={a.id} size={40} />
-                        <div className="agent-card-body">
-                          <div className="agent-card-name">{a.name}</div>
-                          <div className="agent-card-meta">
-                            {a.available ? (
-                              a.version ? (
-                                <span title={a.path ?? ''}>{a.version}</span>
-                              ) : (
-                                <span title={a.path ?? ''}>
-                                  {t('common.installed')}
-                                </span>
-                              )
-                            ) : (
-                              <span className="muted">
-                                {t('common.notInstalled')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        {a.available ? (
-                          <span
-                            className={'status-dot' + (active ? ' active' : '')}
-                            aria-hidden="true"
-                          />
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              {(() => {
-                const selected = agents.find(
-                  (a) => a.id === cfg.agentId && a.available,
-                );
-                if (!selected) return null;
-                const hasModels =
-                  Array.isArray(selected.models) && selected.models.length > 0;
-                const hasReasoning =
-                  Array.isArray(selected.reasoningOptions) &&
-                  selected.reasoningOptions.length > 0;
-                if (!hasModels && !hasReasoning) return null;
-                const choice = cfg.agentModels?.[selected.id] ?? {};
-                const setChoice = (
-                  next: { model?: string; reasoning?: string },
-                ) => {
-                  setCfg((c) => {
-                    const prev = c.agentModels?.[selected.id] ?? {};
-                    return {
-                      ...c,
-                      agentModels: {
-                        ...(c.agentModels ?? {}),
-                        [selected.id]: { ...prev, ...next },
-                      },
-                    };
-                  });
-                };
-                const modelValue =
-                  choice.model ?? selected.models?.[0]?.id ?? '';
-                const reasoningValue =
-                  choice.reasoning ??
-                  selected.reasoningOptions?.[0]?.id ?? '';
-                const customActive =
-                  hasModels && isCustomModel(modelValue, selected.models!);
-                const selectValue = customActive
-                  ? CUSTOM_MODEL_SENTINEL
-                  : modelValue;
-                return (
-                  <div className="agent-model-row">
-                    {hasModels ? (
-                      <label className="field">
-                        <span className="field-label">
-                          {t('settings.modelPicker')}
-                        </span>
-                        <select
-                          value={selectValue}
-                          onChange={(e) => {
-                            if (e.target.value === CUSTOM_MODEL_SENTINEL) {
-                              // Switching to "Custom…" should clear the
-                              // value so the input below opens empty for
-                              // typing — keeping the previous live id
-                              // would defeat the point.
-                              setChoice({ model: '' });
-                            } else {
-                              setChoice({ model: e.target.value });
-                            }
-                          }}
-                        >
-                          {renderModelOptions(selected.models!)}
-                          <option value={CUSTOM_MODEL_SENTINEL}>
-                            {t('settings.modelCustom')}
-                          </option>
-                        </select>
-                      </label>
-                    ) : null}
-                    {customActive ? (
-                      <label className="field">
-                        <span className="field-label">
-                          {t('settings.modelCustomLabel')}
-                        </span>
-                        <input
-                          type="text"
-                          value={modelValue}
-                          placeholder={t('settings.modelCustomPlaceholder')}
-                          onChange={(e) =>
-                            setChoice({ model: e.target.value.trim() })
-                          }
-                        />
-                      </label>
-                    ) : null}
-                    {hasReasoning ? (
-                      <label className="field">
-                        <span className="field-label">
-                          {t('settings.reasoningPicker')}
-                        </span>
-                        <select
-                          value={reasoningValue}
-                          onChange={(e) =>
-                            setChoice({ reasoning: e.target.value })
-                          }
-                        >
-                          {selected.reasoningOptions!.map((r) => (
-                            <option key={r.id} value={r.id}>
-                              {r.label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ) : null}
-                    <p className="hint">{t('settings.modelPickerHint')}</p>
-                  </div>
-                );
-              })()}
-            </section>
-          ) : (
+
             <section className="settings-section">
               <div className="section-head">
                 <div>
@@ -771,28 +553,30 @@ export function SettingsDialog({
                   ))}
                 </select>
               </label>
-              <label className="field">
-                <span className="field-label">{t('settings.apiKey')}</span>
-                <div className="field-row">
-                  <input
-                    type={showApiKey ? 'text' : 'password'}
-                    placeholder={API_KEY_PLACEHOLDERS[apiProtocol]}
-                    value={cfg.apiKey}
-                    onChange={(e) => updateApiConfig({ apiKey: e.target.value })}
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    className="ghost icon-btn"
-                    onClick={() => setShowApiKey((v) => !v)}
-                    title={
-                      showApiKey ? t('settings.hideKey') : t('settings.showKey')
-                    }
-                  >
-                    {showApiKey ? t('settings.hide') : t('settings.show')}
-                  </button>
-                </div>
-              </label>
+              {!isLongVan ? (
+                <label className="field">
+                  <span className="field-label">{t('settings.apiKey')}</span>
+                  <div className="field-row">
+                    <input
+                      type={showApiKey ? 'text' : 'password'}
+                      placeholder={API_KEY_PLACEHOLDERS[apiProtocol]}
+                      value={cfg.apiKey}
+                      onChange={(e) => updateApiConfig({ apiKey: e.target.value })}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      className="ghost icon-btn"
+                      onClick={() => setShowApiKey((v) => !v)}
+                      title={
+                        showApiKey ? t('settings.hideKey') : t('settings.showKey')
+                      }
+                    >
+                      {showApiKey ? t('settings.hide') : t('settings.show')}
+                    </button>
+                  </div>
+                </label>
+              ) : null}
               <label className="field">
                 <span className="field-label">
                   {apiProtocol === 'azure'
@@ -821,7 +605,7 @@ export function SettingsDialog({
               {apiProtocol === 'azure' ? (
                 <p className="hint">{t('settings.azureDeploymentModelHint')}</p>
               ) : null}
-              {apiModelCustom || apiModelSelectValue === CUSTOM_MODEL_SENTINEL ? (
+              {!isLongVan && (apiModelCustom || apiModelSelectValue === CUSTOM_MODEL_SENTINEL) ? (
                 <label className="field">
                   <span className="field-label">{t('settings.modelCustomLabel')}</span>
                   <input
@@ -832,28 +616,30 @@ export function SettingsDialog({
                   />
                 </label>
               ) : null}
-              <label className="field">
-                <span className="field-label">{t('settings.baseUrl')}</span>
-                <input
-                  type="url"
-                  inputMode="url"
-                  value={cfg.baseUrl}
-                  aria-invalid={baseUrlInvalid || undefined}
-                  aria-describedby={
-                    baseUrlInvalid ? 'settings-base-url-error' : undefined
-                  }
-                  onChange={(e) => updateApiConfig({ baseUrl: e.target.value, apiProviderBaseUrl: null })}
-                />
-                {baseUrlInvalid ? (
-                  <span
-                    id="settings-base-url-error"
-                    className="settings-field-error"
-                    role="alert"
-                  >
-                    {t('settings.baseUrlInvalid')}
-                  </span>
-                ) : null}
-              </label>
+              {!isLongVan ? (
+                <label className="field">
+                  <span className="field-label">{t('settings.baseUrl')}</span>
+                  <input
+                    type="url"
+                    inputMode="url"
+                    value={cfg.baseUrl}
+                    aria-invalid={baseUrlInvalid || undefined}
+                    aria-describedby={
+                      baseUrlInvalid ? 'settings-base-url-error' : undefined
+                    }
+                    onChange={(e) => updateApiConfig({ baseUrl: e.target.value, apiProviderBaseUrl: null })}
+                  />
+                  {baseUrlInvalid ? (
+                    <span
+                      id="settings-base-url-error"
+                      className="settings-field-error"
+                      role="alert"
+                    >
+                      {t('settings.baseUrlInvalid')}
+                    </span>
+                  ) : null}
+                </label>
+              ) : null}
               {apiProtocol === 'azure' ? (
                 <label className="field">
                   <span className="field-label">{t('settings.apiVersion')}</span>
@@ -867,7 +653,7 @@ export function SettingsDialog({
               ) : null}
               <p className="hint">{t('settings.apiHint')}</p>
             </section>
-          )}
+
             </>
           ) : null}
 

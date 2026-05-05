@@ -11,11 +11,6 @@ export async function streamProxyEndpoint(
   signal: AbortSignal,
   handlers: StreamHandlers,
 ): Promise<void> {
-  if (!cfg.apiKey) {
-    handlers.onError(new Error('Missing API key — open Settings and paste one in.'));
-    return;
-  }
-
   let acc = '';
 
   try {

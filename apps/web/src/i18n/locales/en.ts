@@ -121,6 +121,8 @@ export const en: Dict = {
   'settings.mediaProviderBaseUrlPlaceholder': 'Override default base URL',
   'settings.about': 'About',
   'settings.aboutHint': 'Version and runtime details',
+  'settings.mcpServer': 'MCP server',
+  'settings.mcpServerHint': 'Connect your coding agent',
   'settings.appVersion': 'Version',
   'settings.appChannel': 'Channel',
   'settings.appRuntime': 'Runtime',
