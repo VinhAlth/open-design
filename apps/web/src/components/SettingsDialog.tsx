@@ -56,9 +56,13 @@ interface Props {
 }
 
 const SUGGESTED_MODELS_BY_PROTOCOL = {
-  macdinh: [
+  myai: [
     'gpt-5.4-nano',
     'gpt-5.4-mini',
+    'gpt-4o',
+    'gpt-4o-mini',
+    'claude-3-5-sonnet-latest',
+    'claude-3-5-haiku-latest',
   ],
   anthropic: [
     'claude-opus-4-5',
@@ -111,7 +115,7 @@ const API_PROTOCOL_TABS: Array<{
   id: ApiProtocol;
   title: string;
 }> = [
-    { id: 'macdinh', title: 'Mặc định' },
+    { id: 'myai', title: 'My AI' },
     { id: 'anthropic', title: 'Anthropic' },
     { id: 'openai', title: 'OpenAI' },
     { id: 'azure', title: 'Azure OpenAI' },
@@ -119,7 +123,7 @@ const API_PROTOCOL_TABS: Array<{
   ];
 
 const API_PROTOCOL_LABELS: Record<ApiProtocol, string> = {
-  macdinh: 'Mặc định',
+  myai: 'My AI',
   anthropic: 'Anthropic API',
   openai: 'OpenAI API',
   azure: 'Azure OpenAI',
@@ -127,7 +131,7 @@ const API_PROTOCOL_LABELS: Record<ApiProtocol, string> = {
 };
 
 const API_KEY_PLACEHOLDERS: Record<ApiProtocol, string> = {
-  macdinh: 'sk-...',
+  myai: 'sk-...',
   anthropic: 'sk-ant-...',
   openai: 'sk-...',
   azure: 'azure key',
@@ -529,7 +533,7 @@ export function SettingsDialog({
                       <h3>{API_PROTOCOL_LABELS[apiProtocol]}</h3>
                     </div>
                   </div>
-                  {apiProtocol !== 'macdinh' ? (
+                  {apiProtocol !== 'myai' ? (
                     <label className="field">
                       <span className="field-label">{t('settings.quickFillProvider')}</span>
                       <select
@@ -561,7 +565,7 @@ export function SettingsDialog({
                       </select>
                     </label>
                   ) : null}
-                  {apiProtocol !== 'macdinh' ? (
+                  {apiProtocol !== 'myai' ? (
                     <label className="field">
                       <span className="field-label">{t('settings.apiKey')}</span>
                       <div className="field-row">
@@ -604,12 +608,10 @@ export function SettingsDialog({
                       {apiModelOptions.map((m) => (
                         <option value={m} key={m}>{m}</option>
                       ))}
-                      {apiProtocol !== 'macdinh' ? (
-                        <option value={CUSTOM_MODEL_SENTINEL}>{t('settings.modelCustom')}</option>
-                      ) : null}
+                      <option value={CUSTOM_MODEL_SENTINEL}>{t('settings.modelCustom')}</option>
                     </select>
                   </label>
-                  {!selectedProvider && apiProtocol !== 'macdinh' ? (
+                  {!selectedProvider && apiProtocol !== 'myai' ? (
                     <p className="hint">{t('settings.suggestedModelsHint')}</p>
                   ) : null}
                   {apiProtocol === 'azure' ? (
@@ -626,7 +628,7 @@ export function SettingsDialog({
                       />
                     </label>
                   ) : null}
-                  {apiProtocol !== 'macdinh' ? (
+                  {apiProtocol !== 'myai' ? (
                     <label className="field">
                       <span className="field-label">{t('settings.baseUrl')}</span>
                       <input
@@ -661,7 +663,7 @@ export function SettingsDialog({
                       />
                     </label>
                   ) : null}
-                  {apiProtocol !== 'macdinh' ? (
+                  {apiProtocol !== 'myai' ? (
                     <p className="hint">{t('settings.apiHint')}</p>
                   ) : null}
                 </section>

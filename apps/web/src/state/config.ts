@@ -43,16 +43,16 @@ export const DEFAULT_PET: PetConfig = {
 export const DEFAULT_CONFIG: AppConfig = {
   mode: 'daemon',
   apiKey: '',
-  baseUrl: 'macdinh-ai',
+  baseUrl: 'myai-ai',
   model: 'gpt-5.4-nano',
   // New configs should be explicit. loadConfig() still detects parsed legacy
   // saved configs that did not have this field and migrates those from their
   // saved baseUrl/model before applying the current migration version.
-  apiProtocol: 'macdinh',
+  apiProtocol: 'myai',
   apiVersion: '',
   apiProtocolConfigs: {},
   configMigrationVersion: CONFIG_MIGRATION_VERSION,
-  apiProviderBaseUrl: 'macdinh-ai',
+  apiProviderBaseUrl: 'myai-ai',
   agentId: null,
   skillId: null,
   designSystemId: null,
@@ -88,10 +88,10 @@ export interface KnownProvider {
 export const KNOWN_PROVIDERS: KnownProvider[] = [
   {
     label: 'Mặc định',
-    protocol: 'macdinh',
-    baseUrl: 'macdinh-ai',
+    protocol: 'myai',
+    baseUrl: 'myai-ai',
     model: 'gpt-5.4-nano',
-    models: ['gpt-5.4-nano', 'gpt-5.4-mini'],
+    models: ['gpt-5.4-nano', 'gpt-5.4-mini', 'gpt-4o', 'gpt-4o-mini', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'],
   },
   {
     label: 'Anthropic (Claude)',

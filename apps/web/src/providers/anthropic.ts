@@ -47,7 +47,7 @@ export async function streamMessage(
   if (cfg.apiProtocol === 'google') {
     return streamMessageGoogle(cfg, system, history, signal, handlers);
   }
-  if (cfg.apiProtocol === 'openai' || cfg.apiProtocol === 'macdinh' || (!cfg.apiProtocol && isOpenAICompatible(cfg.model, cfg.baseUrl))) {
+  if (cfg.apiProtocol === 'openai' || cfg.apiProtocol === 'myai' || (!cfg.apiProtocol && isOpenAICompatible(cfg.model, cfg.baseUrl))) {
     return streamMessageOpenAI(cfg, system, history, signal, handlers);
   }
 

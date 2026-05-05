@@ -3268,7 +3268,7 @@ export async function startServer({ port = 7456, host = process.env.OD_BIND_HOST
     /** @type {Partial<ProxyStreamRequest>} */
     const proxyBody = req.body || {};
     let baseUrl = proxyBody.baseUrl || process.env.DEFAULT_OPENAI_BASE_URL || 'https://api.openai.com/v1';
-    if (baseUrl === 'macdinh-ai') baseUrl = process.env.DEFAULT_OPENAI_BASE_URL || 'https://api.openai.com/v1';
+    if (baseUrl === 'myai-ai' || baseUrl === 'macdinh-ai') baseUrl = process.env.DEFAULT_OPENAI_BASE_URL || 'https://api.openai.com/v1';
     const apiKey = proxyBody.apiKey || process.env.DEFAULT_OPENAI_API_KEY;
     const model = proxyBody.model || process.env.DEFAULT_OPENAI_MODEL || 'gpt-4o';
     const { systemPrompt, messages, maxTokens } = proxyBody;
