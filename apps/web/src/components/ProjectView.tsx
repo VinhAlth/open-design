@@ -67,7 +67,7 @@ import {
   removeAttachedComment,
 } from '../comments';
 import { AppChromeHeader } from './AppChromeHeader';
-import { AvatarMenu } from './AvatarMenu';
+import { SettingsMenu } from './SettingsMenu';
 import { ChatPane } from './ChatPane';
 import { decideAutoOpenAfterWrite } from './auto-open-file';
 import { FileWorkspace } from './FileWorkspace';
@@ -1359,7 +1359,7 @@ export function ProjectView({
         onBack={onBack}
         backLabel={t('project.backToProjects')}
         actions={(
-          <AvatarMenu
+          <SettingsMenu
             config={config}
             agents={agents}
             daemonLive={daemonLive}

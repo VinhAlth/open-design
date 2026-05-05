@@ -20,7 +20,7 @@ import { DesignsTab } from './DesignsTab';
 import { DesignSystemPreviewModal } from './DesignSystemPreviewModal';
 import { DesignSystemsTab } from './DesignSystemsTab';
 import { ExamplesTab } from './ExamplesTab';
-import { Icon } from './Icon';
+import { AppChromeHeader, SettingsIconButton } from './AppChromeHeader';
 import { LanguageMenu } from './LanguageMenu';
 import { CenteredLoader } from './Loading';
 import { NewProjectPanel, type CreateInput } from './NewProjectPanel';
@@ -118,8 +118,6 @@ export function EntryView({
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => loadSidebarWidth());
   const [resizing, setResizing] = useState(false);
   const [petRailHidden, setPetRailHiddenState] = useState<boolean>(() => loadPetRailHidden());
-  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
-  const avatarMenuRef = useRef<HTMLDivElement | null>(null);
 
   function setPetRailHidden(next: boolean) {
     setPetRailHiddenState(next);
@@ -208,26 +206,7 @@ export function EntryView({
     }
   }, [sidebarWidth]);
 
-  // Dismiss the avatar dropdown on outside-click / Escape so it behaves
-  // like the project-view AvatarMenu (which uses the same shell CSS).
-  useEffect(() => {
-    if (!avatarMenuOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (!avatarMenuRef.current) return;
-      if (!avatarMenuRef.current.contains(e.target as Node)) {
-        setAvatarMenuOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setAvatarMenuOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onClick);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [avatarMenuOpen]);
+
 
   // The right rail tracks its own collapse state internally and tells
   // us its preferred column width via a CSS variable on the wrapper —
@@ -298,43 +277,11 @@ export function EntryView({
             {/* Avatar dropdown — mirrors the project-view AvatarMenu so
                 users get the same anchor for cross-cutting options
                 (open settings, hide / show the pet rail). */}
-            <div className="avatar-menu" ref={avatarMenuRef}>
-              <button
-                type="button"
-                className="avatar-btn"
-                onClick={() => setAvatarMenuOpen((v) => !v)}
-                title={t('entry.openSettingsTitle')}
-                aria-label={t('entry.openSettingsAria')}
-                aria-haspopup="menu"
-                aria-expanded={avatarMenuOpen}
-              >
-                <img
-                  src="/avatar.png"
-                  alt=""
-                  aria-hidden
-                  draggable={false}
-                  className="avatar-btn-photo"
-                />
-              </button>
-              {avatarMenuOpen ? (
-                <div className="avatar-popover" role="menu">
-
-                  <button
-                    type="button"
-                    className="avatar-item"
-                    onClick={() => {
-                      setAvatarMenuOpen(false);
-                      onOpenSettings();
-                    }}
-                  >
-                    <span className="avatar-item-icon" aria-hidden>
-                      <Icon name="settings" size={14} />
-                    </span>
-                    <span>{t('avatar.settings')}</span>
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <SettingsIconButton
+              onClick={onOpenSettings}
+              title={t('entry.openSettingsTitle')}
+              ariaLabel={t('entry.openSettingsAria')}
+            />
           </div>
         </div>
         <div className="entry-tab-content">

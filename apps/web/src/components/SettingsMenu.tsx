@@ -26,7 +26,7 @@ interface Props {
  * with current execution mode, the agent picker (when in daemon mode), and
  * a Settings entry — replaces the wide AgentPicker + env-pill row.
  */
-export function AvatarMenu({
+export function SettingsMenu({
   config,
   agents,
   daemonLive,
@@ -93,20 +93,6 @@ export function AvatarMenu({
       </button>
       {open ? (
         <div className="avatar-popover" role="menu">
-          <div className="avatar-popover-head">
-            <span className="who">
-              {config.mode === 'daemon'
-                ? t('avatar.localCli')
-                : apiProtocolLabel(config.apiProtocol)}
-            </span>
-            <span className="where">
-              {config.mode === 'api'
-                ? safeHost(config.baseUrl)
-                : currentAgent
-                  ? `${currentAgent.name}${currentAgent.version ? ` · ${currentAgent.version}` : ''}${currentModelLabel && currentModelId !== 'default' ? ` · ${currentModelLabel}` : ''}`
-                  : t('avatar.noAgentSelected')}
-            </span>
-          </div>
 
           <button
             type="button"
