@@ -267,47 +267,7 @@ export function EntryView({
           loading={loading}
         />
         <div className="entry-side-foot">
-          <button
-            type="button"
-            className={`foot-pill pet-pill${config.pet?.adopted ? '' : ' pet-pill-fresh'}`}
-            onClick={onAdoptPet}
-            title={
-              config.pet?.adopted
-                ? t('pet.changePet')
-                : t('pet.adoptCallout')
-            }
-          >
-            <span className="pet-pill-glyph" aria-hidden>
-              {config.pet?.adopted
-                ? config.pet.petId === 'custom'
-                  ? config.pet.custom.glyph || '🦄'
-                  : '🐾'
-                : '🐾'}
-            </span>
-            <span>
-              {config.pet?.adopted
-                ? t('pet.changePet')
-                : t('pet.adoptCallout')}
-            </span>
-            {!config.pet?.adopted ? <span className="pet-pill-dot" aria-hidden /> : null}
-          </button>
-          <button
-            type="button"
-            className="foot-pill"
-            onClick={onOpenSettings}
-            title={t('settings.envConfigure')}
-          >
-            <Icon name="settings" size={12} />
-            <span>
-              {config.mode === 'daemon'
-                ? t('settings.localCli')
-                : apiProtocolLabel(config.apiProtocol)}
-            </span>
-            <span style={{ color: 'var(--text-faint)' }}>·</span>
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
-              {envMetaLine}
-            </span>
-          </button>
+
           <LanguageMenu />
         </div>
         <button
@@ -423,15 +383,7 @@ export function EntryView({
           )}
         </div>
       </main>
-      {petRailHidden ? null : (
-        <PetRail
-          config={config}
-          onAdoptInline={onAdoptPetInline}
-          onOpenPetSettings={onAdoptPet}
-          onTuck={onTogglePet}
-          onHide={() => setPetRailHidden(true)}
-        />
-      )}
+
       {previewSystem ? (
         <DesignSystemPreviewModal
           system={previewSystem}

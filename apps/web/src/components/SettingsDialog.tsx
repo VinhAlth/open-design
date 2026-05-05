@@ -437,17 +437,7 @@ export function SettingsDialog({
                 <small>{`${t('settings.localCli')} / ${t('settings.modeApiMeta')}`}</small>
               </span>
             </button>
-            <button
-              type="button"
-              className={`settings-nav-item${activeSection === 'media' ? ' active' : ''}`}
-              onClick={() => setActiveSection('media')}
-            >
-              <Icon name="image" size={18} />
-              <span>
-                <strong>{t('settings.mediaProviders')}</strong>
-                <small>Image / video / audio</small>
-              </span>
-            </button>
+
             <button
               type="button"
               className={`settings-nav-item${activeSection === 'integrations' ? ' active' : ''}`}
@@ -492,17 +482,7 @@ export function SettingsDialog({
                 <small>{t('settings.notificationsHint')}</small>
               </span>
             </button>
-            <button
-              type="button"
-              className={`settings-nav-item${activeSection === 'pet' ? ' active' : ''}`}
-              onClick={() => setActiveSection('pet')}
-            >
-              <Icon name="sparkles" size={18} />
-              <span>
-                <strong>{t('pet.navTitle')}</strong>
-                <small>{t('pet.navHint')}</small>
-              </span>
-            </button>
+
             <button
               type="button"
               className={`settings-nav-item${activeSection === 'about' ? ' active' : ''}`}
@@ -522,28 +502,8 @@ export function SettingsDialog({
                 className="seg-control"
                 role="tablist"
                 aria-label={t('settings.modeAria')}
-                style={{ ['--seg-cols' as string]: 2 } as CSSProperties}
+                style={{ ['--seg-cols' as string]: 1 } as CSSProperties}
               >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={cfg.mode === 'daemon'}
-                  className={'seg-btn' + (cfg.mode === 'daemon' ? ' active' : '')}
-                  disabled={!daemonLive}
-                  onClick={() => setMode('daemon')}
-                  title={
-                    daemonLive
-                      ? t('settings.modeDaemonHelp')
-                      : t('settings.modeDaemonOffline')
-                  }
-                >
-                  <span className="seg-title">{t('settings.localCli')}</span>
-                  <span className="seg-meta">
-                    {daemonLive
-                      ? t('settings.modeDaemonInstalledMeta', { count: installedCount })
-                      : t('settings.modeDaemonOfflineMeta')}
-                  </span>
-                </button>
                 <button
                   type="button"
                   role="tab"
