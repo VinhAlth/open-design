@@ -24,6 +24,7 @@ import { pl } from './locales/pl';
 import { hu } from './locales/hu';
 import { fr } from './locales/fr';
 import { uk } from './locales/uk';
+import { vi } from './locales/vi';
 import { LOCALES, type Dict, type Locale } from './types';
 
 export { LOCALES, LOCALE_LABEL } from './types';
@@ -47,6 +48,7 @@ const DICTS: Record<Locale, Dict> = {
   'hu': hu,
   'fr': fr,
   'uk': uk,
+  'vi': vi,
 };
 
 const LS_KEY = 'open-design:locale';
