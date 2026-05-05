@@ -284,7 +284,7 @@ export function NewProjectPanel({
           <Icon name="chevron-left" size={16} strokeWidth={2} />
         </button>
         <div className="newproj-tabs" role="tablist" ref={tabsRef}>
-          {(Object.keys(TAB_LABEL_KEYS) as CreateTab[]).map((entry) => (
+          {(['prototype', 'deck', 'template'] as CreateTab[]).map((entry) => (
             <button
               key={entry}
               role="tab"

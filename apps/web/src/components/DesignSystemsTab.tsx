@@ -33,9 +33,6 @@ type SurfaceFilter = 'all' | Surface;
 const SURFACE_PILLS: { value: SurfaceFilter; labelKey: 'examples.modeAll' | 'ds.surfaceWeb' | 'ds.surfaceImage' | 'ds.surfaceVideo' | 'ds.surfaceAudio' }[] = [
   { value: 'all', labelKey: 'examples.modeAll' },
   { value: 'web', labelKey: 'ds.surfaceWeb' },
-  { value: 'image', labelKey: 'ds.surfaceImage' },
-  { value: 'video', labelKey: 'ds.surfaceVideo' },
-  { value: 'audio', labelKey: 'ds.surfaceAudio' },
 ];
 
 function surfaceOf(system: DesignSystemSummary): Surface {

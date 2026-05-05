@@ -29,7 +29,7 @@ import { PromptTemplatePreviewModal } from './PromptTemplatePreviewModal';
 import { PromptTemplatesTab } from './PromptTemplatesTab';
 import { apiProtocolLabel } from '../utils/apiProtocol';
 
-type TopTab = 'designs' | 'examples' | 'design-systems' | 'image-templates' | 'video-templates';
+type TopTab = 'designs' | 'examples' | 'design-systems';
 
 interface Props {
   skills: SkillSummary[];
@@ -333,18 +333,6 @@ export function EntryView({
               label={t('entry.tabDesignSystems')}
               onClick={setTopTab}
             />
-            <TopTabButton
-              current={topTab}
-              value="image-templates"
-              label={t('entry.tabImageTemplates')}
-              onClick={setTopTab}
-            />
-            <TopTabButton
-              current={topTab}
-              value="video-templates"
-              label={t('entry.tabVideoTemplates')}
-              onClick={setTopTab}
-            />
           </div>
           <div className="entry-header-right">
             {/* Avatar dropdown — mirrors the project-view AvatarMenu so
@@ -429,20 +417,6 @@ export function EntryView({
                   selectedId={defaultDesignSystemId}
                   onSelect={onChangeDefaultDesignSystem}
                   onPreview={previewDesignSystem}
-                />
-              ) : null}
-              {topTab === 'image-templates' ? (
-                <PromptTemplatesTab
-                  surface="image"
-                  templates={promptTemplates}
-                  onPreview={setPreviewPromptTemplate}
-                />
-              ) : null}
-              {topTab === 'video-templates' ? (
-                <PromptTemplatesTab
-                  surface="video"
-                  templates={promptTemplates}
-                  onPreview={setPreviewPromptTemplate}
                 />
               ) : null}
             </>

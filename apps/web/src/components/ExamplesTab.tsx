@@ -26,9 +26,6 @@ type ScenarioFilter = string;
 const SURFACE_PILLS: { value: SurfaceFilter; labelKey: keyof Dict }[] = [
   { value: 'all', labelKey: 'examples.modeAll' },
   { value: 'web', labelKey: 'examples.surfaceWeb' },
-  { value: 'image', labelKey: 'examples.surfaceImage' },
-  { value: 'video', labelKey: 'examples.surfaceVideo' },
-  { value: 'audio', labelKey: 'examples.surfaceAudio' },
 ];
 
 const MODE_PILLS: { value: ModeFilter; labelKey: keyof Dict }[] = [
